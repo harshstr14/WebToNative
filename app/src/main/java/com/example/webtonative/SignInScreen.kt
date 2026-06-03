@@ -1,5 +1,6 @@
 package com.example.webtonative
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -35,14 +36,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -72,11 +71,12 @@ class SignInScreen : ComponentActivity() {
             googleSignInManager.handleSignInResult(
                 it,
                 onSuccess = { auth ->
-//                    startActivity(
-//                        Intent(this, MainScreen::class.java).apply {
-//                            flags =Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-//                        }
-//                    )
+                    startActivity(
+                        Intent(this, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                    )
                 },
                 onError = { message ->
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -89,6 +89,18 @@ class SignInScreen : ComponentActivity() {
         auth = FirebaseAuth.getInstance()
 
         super.onCreate(savedInstanceState)
+
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        if (firebaseUser != null) {
+            startActivity(
+                Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+            )
+            finish()
+            return
+        }
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(
@@ -180,13 +192,16 @@ fun SignIn_Screen(
                 .background(colorResource(R.color.background_color))
                 .padding(paddingValues)
         ) {
-            val (text, text1, text2, box, dividerLeft, dividerRight, dividerText) = createRefs()
+            val (
+                termsAndPrivacyText, subtitleText, titleText, googleSignInButton,
+                leftDivider, rightDivider, signInWithText
+            ) = createRefs()
 
             Text(
                 text = "WebToNative",
                 modifier = Modifier
-                    .constrainAs(text2) {
-                        bottom.linkTo(text1.top, margin = 5.dp)
+                    .constrainAs(titleText) {
+                        bottom.linkTo(subtitleText.top, margin = 5.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
@@ -200,24 +215,24 @@ fun SignIn_Screen(
             Text(
                 text = "Turn your web app into a native experience",
                 modifier = Modifier
-                    .constrainAs(text1) {
-                        bottom.linkTo(dividerText.top, margin = 55.dp)
+                    .constrainAs(subtitleText) {
+                        bottom.linkTo(signInWithText.top, margin = 55.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
                     .padding(horizontal = 45.dp),
                 fontSize = 16.sp, fontFamily = fonts,
                 fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.secondary_text_color).copy(alpha = 0.95f),
+                color = colorResource(R.color.secondary_text_color),
                 textAlign = TextAlign.Center, lineHeight = 24.sp
             )
 
             Box(
                 modifier = Modifier
-                    .constrainAs(dividerLeft) {
-                        top.linkTo(dividerText.top)
-                        bottom.linkTo(dividerText.bottom)
-                        end.linkTo(dividerText.start, margin = 12.dp)
+                    .constrainAs(leftDivider) {
+                        top.linkTo(signInWithText.top)
+                        bottom.linkTo(signInWithText.bottom)
+                        end.linkTo(signInWithText.start, margin = 12.dp)
                     }
                     .width(90.dp).height(1.2.dp)
                     .drawWithCache {
@@ -235,8 +250,8 @@ fun SignIn_Screen(
             Text(
                 text = "SIGN IN WITH",
                 modifier = Modifier
-                    .constrainAs(dividerText) {
-                        bottom.linkTo(box.top, margin = 18.dp)
+                    .constrainAs(signInWithText) {
+                        bottom.linkTo(googleSignInButton.top, margin = 18.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
@@ -248,10 +263,10 @@ fun SignIn_Screen(
 
             Box(
                 modifier = Modifier
-                    .constrainAs(dividerRight) {
-                        top.linkTo(dividerText.top)
-                        bottom.linkTo(dividerText.bottom)
-                        start.linkTo(dividerText.end, margin = 12.dp)
+                    .constrainAs(rightDivider) {
+                        top.linkTo(signInWithText.top)
+                        bottom.linkTo(signInWithText.bottom)
+                        start.linkTo(signInWithText.end, margin = 12.dp)
                     }
                     .width(90.dp).height(1.2.dp)
                     .drawWithCache {
@@ -268,10 +283,10 @@ fun SignIn_Screen(
 
             Box(
                 modifier = Modifier
-                    .constrainAs(box) {
+                    .constrainAs(googleSignInButton) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        bottom.linkTo(text.top, margin = 25.dp)
+                        bottom.linkTo(termsAndPrivacyText.top, margin = 25.dp)
                     }
                     .padding(horizontal = 30.dp)
                     .height(68.dp)
@@ -310,7 +325,7 @@ fun SignIn_Screen(
 
             Row (
                 modifier = Modifier
-                    .constrainAs(text) {
+                    .constrainAs(termsAndPrivacyText) {
                         bottom.linkTo(parent.bottom, margin = 25.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
