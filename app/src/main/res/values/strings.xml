@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">WebToNative</string>
+    <string name="web_client_id">123724275191-b2u4ukuhd0jgldhmqqlbv80f8h9vvrkc.apps.googleusercontent.com</string>
+    <string name="title_activity_home_screen">HomeScreen</string>
+</resources>
