@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -238,6 +240,14 @@ fun HomeScreen(
                     shape = RoundedCornerShape(16.dp)
                 )
         ) {
+            Image(
+                painter = painterResource(R.drawable.card_webview),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
