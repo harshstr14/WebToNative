@@ -1,86 +1,343 @@
-# WebToNative
+# 🌐 WebToNative
 
-WebToNative is a modern Android application built with Jetpack Compose that seamlessly converts web content into a native app experience. It features Google Authentication, real-time user profile synchronization, local browsing history, and intelligent background notifications.
+**WebToNative** is a modern Android application built with **Jetpack Compose** that seamlessly transforms web content into a native Android experience. The app combines secure Google Authentication, local browsing history management, and background notifications to provide a smooth and user-friendly browsing experience.
 
-## 1. Project Setup Steps
+---
 
-1.  **Clone the Repository**:
-    ```bash
-    git clone https://github.com/your-repo/WebToNative.git
-    ```
-2.  **Open in Android Studio**:
-    Open the project in Android Studio Ladybug (or newer).
-3.  **Firebase Configuration**:
-    -   Create a new project in the [Firebase Console](https://console.firebase.google.com/).
-    -   Add an Android App with the package name `com.example.webtonative`.
-    -   Download `google-services.json` and place it in the `app/` directory.
-    -   Enable **Google Sign-In** in the Firebase Authentication settings.
-    -   Enable **Realtime Database**.
-4.  **Google Web Client ID**:
-    -   Update the `web_client_id` in `app/src/main/res/values/strings.xml` with your Firebase Web Client ID.
-5.  **Build and Run**:
-    -   Sync the project with Gradle files.
-    -   Run the app on an emulator or a physical device.
+# 🚀 1. Project Setup
 
-## 2. Firebase Setup Explanation
+### 1️⃣ Clone the Repository
 
-The app utilizes Firebase for two primary purposes:
--   **Authentication**: Implements Google Sign-In via `GoogleSignInManager`. It handles the exchange of Google ID tokens for Firebase credentials, allowing secure user access.
--   **Realtime Database**: Automatically creates and maintains user profiles. When a user signs in for the first time, their name, email, and high-quality profile picture URL (processed from the Google account) are stored under a unique `Users/$userID` node.
+```bash
+git clone https://github.com/your-repo/WebToNative.git
+```
 
-## 3. Architecture Explanation
+### 2️⃣ Open in Android Studio
 
-The project follows the **MVVM (Model-View-ViewModel)** architecture pattern, ensuring a clean separation of concerns:
--   **View (Jetpack Compose)**: UI components like `HomeScreen`, `WebViewScreen`, and `HistoryScreen` observe state from ViewModels.
--   **ViewModel**: `WebViewViewModel` and `HistoryViewModel` manage the business logic and expose state using `StateFlow`.
--   **Repository**: `HistoryRepository` acts as a single source of truth for browsing data, abstracting the Room database.
--   **Dependency Injection**: Powered by **Hilt**, which simplifies the management of singleton instances like the database and repositories.
+Open the project using **Android Studio Ladybug (or newer)**.
 
-## 4. Database Schema Explanation
+### 3️⃣ Configure Firebase
 
-### Local Database (Room)
-Used for storing browsing history locally on the device.
--   **Table**: `history`
--   **Fields**:
-    -   `id`: Primary Key (Auto-generated)
-    -   `url`: The visited web address.
-    -   `title`: The page title.
-    -   `visit_count`: Number of times the URL was visited.
-    -   `last_visited_time`: Timestamp of the most recent visit.
+#### 🔹 Create a Firebase Project
+- Visit the Firebase Console.
+- Create a new Firebase project.
 
-### Remote Database (Firebase RTDB)
-Used for cross-device user profile persistence.
--   **Root Node**: `Users`
--   **Child Node**: `userID` (Firebase UID)
-    -   `name`: User's display name.
-    -   `mail`: User's email address.
-    -   `photoUrl`: Link to the user's Google profile picture.
+#### 🔹 Register Android App
+- Add an Android application with package name:
 
-## 5. Notification Flow Explanation
+```text
+com.example.webtonative
+```
 
-The app implements a "Welcome Back" notification system that triggers after the user leaves the app:
-1.  **Lifecycle Observation**: An `AppLifecycleObserver` (using `DefaultLifecycleObserver`) monitors when the app enters the background (`onStop`).
-2.  **Scheduling**: When the app is stopped, a `WelcomeNotificationWorker` is scheduled using **WorkManager** with a 1-minute delay.
-3.  **Verification**: The worker checks if a notification has already been shown today and ensures the app is still in the background before posting.
-4.  **Posting**: If conditions are met, a notification is displayed via `NotificationHelper`.
+#### 🔹 Download Configuration File
+- Download `google-services.json`.
+- Place it inside the `app/` directory.
 
-## 6. WebView Lifecycle Handling Explanation
+#### 🔹 Enable Firebase Services
+- ✅ Google Authentication (Google Sign-In)
+- ✅ Firebase Realtime Database
 
-Managing a `WebView` within Jetpack Compose requires careful handling of its state during configuration changes (like screen rotation):
--   **State Preservation**: The `WebViewViewModel` holds a `Bundle` named `webViewState`.
--   **Save/Restore**: 
-    -   In `WebViewScreen`, a `DisposableEffect` is used to call `webView.saveState(bundle)` when the composable is disposed.
-    -   When the `AndroidView` is (re)created, it checks `webViewViewModel.webViewState`. If present, it calls `restoreState()` instead of `loadUrl()`, preserving the back stack and scroll position.
+### 4️⃣ Configure Google Web Client ID
 
-## 7. Challenges Faced
+Update the `web_client_id` inside:
 
--   **WebView State Persistence**: Unlike native Fragments/Activities, Compose doesn't automatically preserve `WebView` state on configuration changes. Implementing a manual save/restore mechanism via the ViewModel was necessary.
--   **Permission Handling**: Managing the `POST_NOTIFICATIONS` permission introduced in Android 13 required a robust request flow in `MainActivity` to ensure background workers could actually notify the user.
--   **Background Task Constraints**: Ensuring the `WorkManager` didn't fire notifications while the app was still in the foreground required careful synchronization with the `ProcessLifecycleOwner`.
+```xml
+app/src/main/res/values/strings.xml
+```
 
-## 8. Future Improvements
+with your Firebase Web Client ID.
 
--   **FCM Integration**: Replace local scheduled notifications with Firebase Cloud Messaging for server-side push notifications.
--   **Bookmarks & Folders**: Add functionality to save favorite URLs into organized folders within the local Room database.
--   **Offline Support**: Implement web caching strategies to allow users to view previously visited pages without an active internet connection.
--   **Enhanced Search**: Add a search bar to the History screen to filter through large sets of browsing data.
+### 5️⃣ Build & Run
+
+- Sync Gradle files.
+- Run the application on an emulator or physical Android device.
+
+---
+
+# 🔥 2. Firebase Integration
+
+Firebase powers two core features of the application:
+
+## 🔐 Authentication
+
+The app uses **Google Sign-In** through `GoogleSignInManager`.
+
+### Features
+- Secure Google account authentication
+- Firebase credential exchange using Google ID tokens
+- Persistent login sessions
+
+---
+
+# 🏗️ 3. Architecture
+
+The application follows the **MVVM (Model–View–ViewModel)** architecture pattern to maintain scalability and clean code separation.
+
+## 🎨 View Layer (Jetpack Compose)
+
+Responsible for rendering UI and observing ViewModel state.
+
+### Screens
+- HomeScreen
+- WebViewScreen
+- HistoryScreen
+
+## 🧠 ViewModel Layer
+
+Handles business logic and UI state management using `StateFlow`.
+
+### ViewModels
+- WebViewViewModel
+- HistoryViewModel
+
+## 📦 Repository Layer
+
+Acts as the single source of truth for data operations.
+
+### Repository
+- HistoryRepository
+
+### Responsibilities
+- Room database interactions
+- Data abstraction from UI layer
+
+## 💉 Dependency Injection
+
+Implemented using **Hilt**.
+
+### Benefits
+- Cleaner code
+- Easier testing
+- Lifecycle-aware dependency management
+
+---
+
+# 🗄️ 4. Database Schema
+
+## 📱 Local Database (Room)
+
+Used to store browsing history on the device.
+
+### Table: `history`
+
+| Field | Description |
+|---------|-------------|
+| id | Auto-generated Primary Key |
+| url | Visited website URL |
+| title | Web page title |
+| visit_count | Number of visits |
+| last_visited_time | Last visit timestamp |
+
+---
+
+# 🔔 5. Notification Flow
+
+The application includes a **"Welcome Back"** notification system that encourages users to return after leaving the app.
+
+## 📌 Flow Overview
+
+### 1️⃣ Lifecycle Monitoring
+
+`AppLifecycleObserver` monitors app state using `DefaultLifecycleObserver`.
+
+When the app enters the background:
+
+```kotlin
+onStop()
+```
+
+is triggered.
+
+### 2️⃣ Notification Scheduling
+
+A `WelcomeNotificationWorker` is scheduled using **WorkManager** with a **1-minute delay**.
+
+### 3️⃣ Validation Checks
+
+Before displaying a notification, the worker verifies:
+
+- Notification hasn't already been shown today
+- App is still running in the background
+
+### 4️⃣ Notification Delivery
+
+If all conditions are met:
+
+```text
+NotificationHelper
+```
+
+creates and displays the notification.
+
+---
+
+# 🌍 6. WebView Lifecycle Handling
+
+Managing a WebView inside Jetpack Compose requires special handling to survive configuration changes.
+
+## 💾 State Preservation
+
+`WebViewViewModel` stores a:
+
+```kotlin
+Bundle webViewState
+```
+
+containing:
+
+- Navigation history
+- Scroll position
+- Current page state
+
+## 🔄 Save & Restore Process
+
+### Saving State
+
+Inside `DisposableEffect`:
+
+```kotlin
+webView.saveState(bundle)
+```
+
+is called when the composable is removed.
+
+### Restoring State
+
+When the WebView is recreated:
+
+```kotlin
+webView.restoreState(bundle)
+```
+
+is executed instead of:
+
+```kotlin
+loadUrl()
+```
+
+This preserves:
+
+- Back stack history
+- Current webpage
+- Scroll position
+
+without reloading the page.
+
+---
+
+# 📱 7. App State Handling
+
+The application properly handles:
+
+## 🔄 Screen Rotation
+- Preserves WebView state
+- Prevents duplicate navigation
+- Maintains UI consistency
+
+## ⚙️ System Process Death
+- Restores critical application state
+- Recovers browsing session
+
+## 🌗 Dark / Light Theme Changes
+- Updates UI dynamically
+- Retains current screen state
+- Prevents unnecessary reloads
+
+### ✅ Expected Results
+
+- No crashes
+- Correct state restoration
+- No duplicate navigation events
+
+---
+
+# ⚡ 8. Challenges Faced
+
+## 🌐 WebView State Persistence
+
+Jetpack Compose does not automatically preserve WebView state like traditional Fragments.
+
+### Solution
+- Custom save/restore implementation using ViewModel and Bundle.
+
+## 🔐 Notification Permission Handling
+
+Android 13 introduced:
+
+```text
+POST_NOTIFICATIONS
+```
+
+permission requirements.
+
+### Solution
+- Implemented a dedicated permission request flow in MainActivity.
+
+## ⏳ Background Task Constraints
+
+Notifications should not appear while the app is open.
+
+### Solution
+- Synchronized WorkManager with ProcessLifecycleOwner state.
+
+---
+
+# 🚀 9. Future Improvements
+
+## 📩 Firebase Cloud Messaging (FCM)
+Replace local notifications with server-driven push notifications.
+
+## ⭐ Bookmarks & Collections
+Allow users to:
+- Save favorite websites
+- Organize bookmarks into folders
+
+## 📶 Offline Browsing
+Implement caching mechanisms for previously visited pages.
+
+## 🔍 Advanced History Search
+Add:
+- Search functionality
+- URL filtering
+- History categorization
+
+## 🌍 Multi-Tab Browsing
+Support multiple active browsing sessions.
+
+## 📊 Analytics Dashboard
+Provide user insights such as:
+- Most visited websites
+- Daily browsing activity
+- Usage statistics
+
+---
+
+# ❤️ Built With
+
+- 🎨 Jetpack Compose
+- 🔥 Firebase Authentication
+- ☁️ Firebase Realtime Database
+- 🗄️ Room Database
+- 💉 Hilt Dependency Injection
+- 🔄 StateFlow
+- ⚙️ WorkManager
+- 🌐 Android WebView
+- 🧭 Navigation Compose
+
+---
+
+## 🌟 Key Features
+
+- 🔐 Google Sign-In Authentication
+- ☁️ Firebase User Profile Synchronization
+- 🌐 Native WebView Experience
+- 📜 Local Browsing History
+- 🔔 Smart Welcome Back Notifications
+- 🌗 Dynamic Dark & Light Theme Support
+- 🔄 Configuration Change Handling
+- 📱 Process Death Recovery
+- ⚡ Modern MVVM Architecture
+
+---
+
+**🚀 WebToNative — Bringing Web Experiences Closer to Native Android**
