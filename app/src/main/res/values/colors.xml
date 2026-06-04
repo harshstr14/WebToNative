@@ -9,8 +9,38 @@
     <color name="white">#FFFFFFFF</color>
 
     //Light Theme
+    <!-- Backgrounds -->
     <color name="background_color">#F0F2F8</color>
-    <color name="off_white">#FAF9F6</color>
+    <color name="surface_color">#F6F7FB</color>
+    <color name="secondary_surface_color">#F4F4F8</color>
+
+    <!-- Borders -->
+    <color name="border_color">#E5E7EB</color>
+
+    <!-- Text -->
     <color name="primary_text_color">#111111</color>
     <color name="secondary_text_color">#999999</color>
+    <color name="tertiary_text_color">#9CA3AF</color>
+    <color name="placeholder_text_color">#B0B7C3</color>
+    <color name="secondary_text_color2">#6B7280</color>
+    <color name="dark_text_color">#374151</color>
+
+    <!-- Icons -->
+    <color name="icon_tint_color">#555555</color>
+
+    <!-- Brand / Primary -->
+    <color name="primary_color">#3B5FF1</color>
+    <color name="primary_color_alpha">#F23B5FF1</color>
+
+    <!-- Indicators -->
+    <color name="indicator_inactive_color">#D1D5DB</color>
+
+    <!-- Selection -->
+    <color name="selection_handle_color">#555555</color>
+
+    <!-- Error -->
+    <color name="error_color">#FF0000</color>
+
+    <color name="off_white">#FAF9F6</color>
+
 </resources>

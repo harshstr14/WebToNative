@@ -1,7 +1,7 @@
 package com.example.webtonative
 
 import android.graphics.Bitmap
-import android.util.Log
+import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -28,7 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,9 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +51,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.webtonative.browsingHistoryDB.viewModel.HistoryViewModel
+import com.example.webtonative.ui.theme.themeColors.AppThemeColors
 import com.example.webtonative.viewModel.WebViewViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +67,7 @@ fun WebViewScreen(
     var webView by remember {
         mutableStateOf<WebView?>(null)
     }
+
     val scrollState = rememberScrollState()
 
     val (backInteraction, backScale) = pressScale()
@@ -81,10 +81,20 @@ fun WebViewScreen(
         }
     }
 
+    DisposableEffect(webView) {
+        onDispose {
+            webView?.let {
+                val bundle = Bundle()
+                it.saveState(bundle)
+                webViewViewModel.webViewState = bundle
+            }
+        }
+    }
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.background_color))
+            .background(AppThemeColors.colors.background_color)
     ) {
         val (topBar, loadingIndicator, errorContainer, webViewContainer) = createRefs()
 
@@ -99,12 +109,12 @@ fun WebViewScreen(
                 .height(64.dp)
                 .padding(horizontal = 15.dp)
                 .background(
-                    color = Color(0xFFF6F7FB),
+                    color = AppThemeColors.colors.surface_color,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .border(
                     width = 1.1.dp,
-                    color = Color(0xFFE5E7EB),
+                    color = AppThemeColors.colors.border_color,
                     shape = RoundedCornerShape(16.dp)
                 )
         ) {
@@ -113,12 +123,12 @@ fun WebViewScreen(
                     .padding(10.dp)
                     .size(46.dp)
                     .background(
-                        color = Color(0xFFF4F4F8),
+                        color = AppThemeColors.colors.secondary_surface_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 1.1.dp,
-                        color = Color(0xFFE5E7EB),
+                        color = AppThemeColors.colors.border_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .clickable(
@@ -144,7 +154,7 @@ fun WebViewScreen(
                 Icon(
                     painter = painterResource(R.drawable.arrow_icon),
                     contentDescription = null,
-                    tint = Color(0xFF555555),
+                    tint = AppThemeColors.colors.icon_tint_color,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -156,12 +166,12 @@ fun WebViewScreen(
                     .height(46.dp)
                     .weight(1f)
                     .background(
-                        color = Color(0xFFF4F4F8),
+                        color = AppThemeColors.colors.secondary_surface_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 1.1.dp,
-                        color = Color(0xFFE5E7EB),
+                        color = AppThemeColors.colors.border_color,
                         shape = RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.CenterStart
@@ -175,7 +185,7 @@ fun WebViewScreen(
                     Icon(
                         painter = painterResource(R.drawable.lock_icon),
                         contentDescription = null,
-                        tint = Color(0xFF555555),
+                        tint = AppThemeColors.colors.icon_tint_color,
                         modifier = Modifier.size(18.dp)
                     )
 
@@ -190,7 +200,7 @@ fun WebViewScreen(
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
-                        color = Color(0xFF9CA3AF),
+                        color = AppThemeColors.colors.tertiary_text_color,
                         modifier = Modifier.horizontalScroll(scrollState)
                     )
                 }
@@ -201,12 +211,12 @@ fun WebViewScreen(
                     .padding(10.dp)
                     .size(46.dp)
                     .background(
-                        color = Color(0xFFF4F4F8),
+                        color = AppThemeColors.colors.secondary_surface_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 1.1.dp,
-                        color = Color(0xFFE5E7EB),
+                        color = AppThemeColors.colors.border_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .clickable(
@@ -231,7 +241,7 @@ fun WebViewScreen(
                 Icon(
                     painter = painterResource(R.drawable.cancel_icon),
                     contentDescription = null,
-                    tint = Color(0xFF555555),
+                    tint = AppThemeColors.colors.icon_tint_color,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -242,8 +252,8 @@ fun WebViewScreen(
                 progress = {
                     uiState.progress / 100f
                 },
-                color = Color(0xF23B5FF1),
-                trackColor = Color(0xFFF6F7FB),
+                color = AppThemeColors.colors.primary_color_alpha,
+                trackColor = AppThemeColors.colors.surface_color,
                 modifier = Modifier
                     .constrainAs(loadingIndicator) {
                         top.linkTo(topBar.bottom, margin = 5.dp)
@@ -268,15 +278,15 @@ fun WebViewScreen(
                         height = Dimension.fillToConstraints
                     }
                     .padding(15.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFF6F7FB)),
+                     .clip(RoundedCornerShape(16.dp))
+                    .background(AppThemeColors.colors.surface_color),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = uiState.errorMessage ?: "",
                     fontSize = 16.sp, fontFamily = fonts,
                     fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                    color = colorResource(R.color.secondary_text_color),
+                    color = AppThemeColors.colors.secondary_text_color,
                     textAlign = TextAlign.Center, lineHeight = 24.sp
                 )
             }
@@ -287,14 +297,14 @@ fun WebViewScreen(
                         top.linkTo(topBar.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(parent.bottom, margin = 15.dp)
 
                         width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     }
                     .padding(15.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFF6F7FB)),
+                    .background(AppThemeColors.colors.surface_color),
                 factory = { context ->
                     WebView(context).apply {
 
@@ -356,7 +366,6 @@ fun WebViewScreen(
                                     webViewViewModel.clearError()
 
                                     url?.let {
-
                                         historyViewModel.saveVisit(
                                             url = it,
                                             title = view?.title ?: ""
@@ -386,7 +395,11 @@ fun WebViewScreen(
                                 }
                             }
 
-                        loadUrl(initialUrl)
+                        if (webViewViewModel.webViewState != null) {
+                            restoreState(webViewViewModel.webViewState!!)
+                        } else {
+                            loadUrl(initialUrl)
+                        }
                     }
                 }
             )

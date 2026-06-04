@@ -1,12 +1,16 @@
 package com.example.webtonative
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -15,6 +19,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,11 +34,15 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -41,39 +50,73 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.webtonative.googleAuthentication.GoogleSignInManager
 import com.example.webtonative.ui.theme.WebToNativeTheme
+import com.example.webtonative.ui.theme.themeColors.AppThemeColors
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var googleSignInManager: GoogleSignInManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        googleSignInManager = GoogleSignInManager(this)
+    private val notificationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            if (granted) {
+                // Notification permission granted
+            } else {
+                // Notification permission denied
+            }
+        }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                scrim = 0xFFF0F2F8.toInt()
-            ),
-            navigationBarStyle = SystemBarStyle.dark(
-                scrim = 0xFFF0F2F8.toInt()
-            )
-        )
+        googleSignInManager = GoogleSignInManager(this)
+
+        requestNotificationPermission()
 
         setContent {
+            val isDark = isSystemInDarkTheme()
+
+            LaunchedEffect(isDark) {
+                AppThemeColors.update(isDark)
+            }
+
+            UpdateSystemBars()
+
             WebToNativeTheme {
                 WebToNative(
                     onGoogleSignOut = {
                         googleSignInManager.signOut {
-                            Toast.makeText(this, "Signed out", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                "Signed out",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
+                )
+            }
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            if (
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(
+                    Manifest.permission.POST_NOTIFICATIONS
                 )
             }
         }
@@ -84,11 +127,12 @@ class MainActivity : ComponentActivity() {
 fun WebToNative(
     onGoogleSignOut: () -> Unit
 ) {
+
     val navController = rememberNavController()
     val snackBarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        modifier = Modifier.background(colorResource(R.color.background_color)),
+        modifier = Modifier.background(AppThemeColors.colors.background_color),
         snackbarHost = {
             SnackbarHost(
                 hostState = snackBarHostState,
@@ -139,9 +183,8 @@ fun WebToNative(
             navController = navController,
             startDestination = "home",
             modifier = Modifier
-                .background(colorResource(R.color.background_color))
+                .background(AppThemeColors.colors.background_color)
                 .padding(top = paddingValues.calculateTopPadding()),
-
             enterTransition = {
                 scaleIn(
                     initialScale = 0.92f,

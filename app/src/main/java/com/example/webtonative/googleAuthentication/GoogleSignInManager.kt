@@ -6,6 +6,8 @@ import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import com.example.webtonative.R
+import com.example.webtonative.browsingHistoryDB.repository.HistoryRepository
+import com.example.webtonative.browsingHistoryDB.roomDB.AppDatabase
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions

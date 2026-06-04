@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 sealed class HistoryUiItem {
@@ -38,23 +39,23 @@ class HistoryViewModel @Inject constructor(
     }
 
     val groupedHistory = history.map { list ->
-        val now = System.currentTimeMillis()
-
         val today = mutableListOf<HistoryUiItem>()
         val yesterday = mutableListOf<HistoryUiItem>()
         val earlier = mutableListOf<HistoryUiItem>()
 
-        list.sortedByDescending { it.lastVisitedTime }.forEach { item ->
+        list.sortedByDescending { it.lastVisitedTime }
+            .forEach { item ->
+                when {
+                    isToday(item.lastVisitedTime) ->
+                        today.add(HistoryUiItem.Item(item))
 
-            val diff = now - item.lastVisitedTime
-            val oneDay = 24 * 60 * 60 * 1000L
+                    isYesterday(item.lastVisitedTime) ->
+                        yesterday.add(HistoryUiItem.Item(item))
 
-            when {
-                diff < oneDay -> today.add(HistoryUiItem.Item(item))
-                diff < oneDay * 2 -> yesterday.add(HistoryUiItem.Item(item))
-                else -> earlier.add(HistoryUiItem.Item(item))
+                    else ->
+                        earlier.add(HistoryUiItem.Item(item))
+                }
             }
-        }
 
         buildList {
             if (today.isNotEmpty()) {
@@ -84,5 +85,29 @@ class HistoryViewModel @Inject constructor(
         viewModelScope.launch {
             repository.deleteAllHistory()
         }
+    }
+
+    fun isToday(timestamp: Long): Boolean {
+        val today = Calendar.getInstance()
+
+        val itemDate = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+        }
+
+        return today.get(Calendar.YEAR) == itemDate.get(Calendar.YEAR) &&
+                today.get(Calendar.DAY_OF_YEAR) == itemDate.get(Calendar.DAY_OF_YEAR)
+    }
+
+    fun isYesterday(timestamp: Long): Boolean {
+        val yesterday = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, -1)
+        }
+
+        val itemDate = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+        }
+
+        return yesterday.get(Calendar.YEAR) == itemDate.get(Calendar.YEAR) &&
+                yesterday.get(Calendar.DAY_OF_YEAR) == itemDate.get(Calendar.DAY_OF_YEAR)
     }
 }

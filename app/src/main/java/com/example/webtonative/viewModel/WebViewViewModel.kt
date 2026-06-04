@@ -1,5 +1,6 @@
 package com.example.webtonative.viewModel
 
+import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import com.example.webtonative.uiState.WebViewUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,8 @@ class WebViewViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(WebViewUiState())
     val uiState = _uiState.asStateFlow()
+
+    var webViewState: Bundle? = null
 
     fun updateUrl(url: String) {
         _uiState.update {

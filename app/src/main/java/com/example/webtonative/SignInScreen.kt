@@ -1,6 +1,7 @@
 package com.example.webtonative
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,12 +12,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,8 +29,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -34,14 +40,21 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -58,7 +71,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.webtonative.googleAuthentication.GoogleSignInManager
+import com.example.webtonative.notifications.WelcomeNotificationWorker
 import com.example.webtonative.ui.theme.WebToNativeTheme
+import com.example.webtonative.ui.theme.themeColors.AppThemeColors
 import com.google.firebase.auth.FirebaseAuth
 
 class SignInScreen : ComponentActivity() {
@@ -71,10 +86,12 @@ class SignInScreen : ComponentActivity() {
             googleSignInManager.handleSignInResult(
                 it,
                 onSuccess = { auth ->
+                    WelcomeNotificationWorker.schedule(this@SignInScreen)
+
                     startActivity(
-                        Intent(this, MainActivity::class.java).apply {
+                        Intent(this@SignInScreen, MainActivity::class.java).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK
                         }
                     )
                 },
@@ -102,16 +119,15 @@ class SignInScreen : ComponentActivity() {
             return
         }
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                scrim = 0xFFF0F2F8.toInt()
-            ),
-            navigationBarStyle = SystemBarStyle.dark(
-                scrim = 0xFFF0F2F8.toInt()
-            )
-        )
-
         setContent {
+            val isDark = isSystemInDarkTheme()
+
+            LaunchedEffect(isDark) {
+                AppThemeColors.update(isDark)
+            }
+
+            UpdateSystemBars()
+
             WebToNativeTheme {
                 SignIn_Screen(
                     onGoogleSignIn = {
@@ -131,15 +147,46 @@ val fonts = FontFamily(
 )
 
 @Composable
+fun UpdateSystemBars() {
+    val activity = LocalContext.current as ComponentActivity
+
+    val bg = AppThemeColors.colors.background_color.toArgb()
+    val isDark = AppThemeColors.isDark
+
+    SideEffect {
+        if (isDark) {
+            activity.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.dark(bg),
+                navigationBarStyle = SystemBarStyle.dark(bg)
+            )
+        } else {
+            activity.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.light(
+                    scrim = bg,
+                    darkScrim = bg
+                ),
+                navigationBarStyle = SystemBarStyle.light(
+                    scrim = bg,
+                    darkScrim = bg
+                )
+            )
+        }
+    }
+}
+
+@Composable
 fun SignIn_Screen(
     onGoogleSignIn: () -> Unit
 ) {
+    val configuration = LocalConfiguration.current
+
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val snackBarHostState = remember { SnackbarHostState() }
-    val (text1Interaction, text1scale) = pressScale()
-    val (text2Interaction, text2scale) = pressScale()
+    val scrollState = rememberScrollState()
 
     Scaffold(
-        modifier = Modifier.background(colorResource(R.color.background_color)),
+        modifier = Modifier.background(AppThemeColors.colors.background_color),
         snackbarHost = {
             SnackbarHost(
                 hostState = snackBarHostState,
@@ -189,43 +236,76 @@ fun SignIn_Screen(
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(R.color.background_color))
+                .background(AppThemeColors.colors.background_color)
                 .padding(paddingValues)
         ) {
             val (
-                termsAndPrivacyText, subtitleText, titleText, googleSignInButton,
-                leftDivider, rightDivider, signInWithText
+                termsAndPrivacyText, googleSignInButton, leftDivider,
+                rightDivider, signInWithText, appLogo
             ) = createRefs()
 
-            Text(
-                text = "WebToNative",
+            Column(
                 modifier = Modifier
-                    .constrainAs(titleText) {
-                        bottom.linkTo(subtitleText.top, margin = 5.dp)
+                    .constrainAs(appLogo) {
+                        top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
+                        bottom.linkTo(signInWithText.top)
                     }
-                    .padding(horizontal = 45.dp),
-                fontSize = 26.sp, fontFamily = fonts,
-                fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.primary_text_color),
-                textAlign = TextAlign.Center, lineHeight = 28.sp
-            )
+                    .then(
+                        if (isLandscape) {
+                            Modifier.padding(top = 0.dp)
+                        } else {
+                            Modifier.padding(top = 65.dp)
+                        }
+                    )
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.image),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(150.dp)
+                )
 
-            Text(
-                text = "Turn your web app into a native experience",
-                modifier = Modifier
-                    .constrainAs(subtitleText) {
-                        bottom.linkTo(signInWithText.top, margin = 55.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .padding(horizontal = 45.dp),
-                fontSize = 16.sp, fontFamily = fonts,
-                fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.secondary_text_color),
-                textAlign = TextAlign.Center, lineHeight = 24.sp
-            )
+                Box(
+                    modifier = Modifier
+                        .size(84.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.logo),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "WebToNative",
+                    modifier = Modifier
+                        .padding(horizontal = 45.dp),
+                    fontSize = 26.sp, fontFamily = fonts,
+                    fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal,
+                    color = AppThemeColors.colors.primary_text_color,
+                    textAlign = TextAlign.Center, lineHeight = 28.sp
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Turn your web app into a native experience",
+                    modifier = Modifier
+                        .padding(horizontal = 45.dp),
+                    fontSize = 16.sp, fontFamily = fonts,
+                    fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
+                    color = AppThemeColors.colors.secondary_text_color,
+                    textAlign = TextAlign.Center, lineHeight = 24.sp
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -257,7 +337,7 @@ fun SignIn_Screen(
                     },
                 fontSize = 15.sp, fontFamily = fonts,
                 fontWeight = FontWeight.Medium, fontStyle = FontStyle.Normal,
-                color = Color(0xFF6B7280),
+                color = AppThemeColors.colors.secondary_text_color2,
                 textAlign = TextAlign.Center, lineHeight = 18.sp
             )
 
@@ -288,14 +368,20 @@ fun SignIn_Screen(
                         end.linkTo(parent.end)
                         bottom.linkTo(termsAndPrivacyText.top, margin = 25.dp)
                     }
-                    .padding(horizontal = 30.dp)
+                    .then(
+                        if (isLandscape) {
+                            Modifier.padding(horizontal = 115.dp)
+                        } else {
+                            Modifier.padding(horizontal = 30.dp)
+                        }
+                    )
                     .height(68.dp)
                     .fillMaxWidth()
                     .clickable {
                         onGoogleSignIn()
                     }
                     .background(
-                        color = colorResource(R.color.primary_text_color).copy(alpha = 0.95f),
+                        color = AppThemeColors.colors.primary_text_color.copy(alpha = 0.95f),
                         shape = RoundedCornerShape(26.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -318,7 +404,7 @@ fun SignIn_Screen(
                         text = "Continue with Google", fontSize = 17.sp,
                         fontFamily = fonts, fontWeight = FontWeight.SemiBold,
                         fontStyle = FontStyle.Normal, lineHeight = 20.sp,
-                        color = colorResource(R.color.off_white)
+                        color = AppThemeColors.colors.background_color
                     )
                 }
             }
@@ -338,7 +424,7 @@ fun SignIn_Screen(
                     pushStringAnnotation(tag = "TERMS", annotation = "terms")
                     withStyle(
                         SpanStyle(
-                            color = colorResource(R.color.primary_text_color),
+                            color = AppThemeColors.colors.primary_text_color,
                             fontWeight = FontWeight.SemiBold
                         )
                     ) {
@@ -351,7 +437,7 @@ fun SignIn_Screen(
                     pushStringAnnotation(tag = "PRIVACY", annotation = "privacy")
                     withStyle(
                         SpanStyle(
-                            color = colorResource(R.color.primary_text_color),
+                            color = AppThemeColors.colors.primary_text_color,
                             fontWeight = FontWeight.SemiBold
                         )
                     ) {
@@ -367,7 +453,7 @@ fun SignIn_Screen(
                         lineHeight = 18.sp,
                         fontFamily = fonts,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF6B7280),
+                        color = AppThemeColors.colors.secondary_text_color2,
                         textAlign = TextAlign.Center
                     )
                 ) { offset ->

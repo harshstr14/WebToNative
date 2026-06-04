@@ -1,26 +1,47 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="300dp"
-    android:height="200dp"
+    android:height="260dp"
     android:viewportWidth="300"
-    android:viewportHeight="200">
+    android:viewportHeight="260">
   <path
-      android:pathData="M20,0L280,0A20,20 0,0 1,300 20L300,180A20,20 0,0 1,280 200L20,200A20,20 0,0 1,0 180L0,20A20,20 0,0 1,20 0z">
+      android:pathData="M0,0h300v260h-300z">
     <aapt:attr name="android:fillColor">
       <gradient
-          android:startX="-0"
+          android:startX="0"
           android:startY="0"
           android:endX="300"
-          android:endY="200"
+          android:endY="260"
           android:type="linear">
-        <item android:offset="0" android:color="#FF1E6BB5"/>
-        <item android:offset="1" android:color="#FF144E8A"/>
+        <item android:offset="0" android:color="#DA1E6BB5"/>
+        <item android:offset="1" android:color="#D9144E8A"/>
       </gradient>
     </aapt:attr>
   </path>
   <path
       android:pathData="M33,20L55,20A13,13 0,0 1,68 33L68,55A13,13 0,0 1,55 68L33,68A13,13 0,0 1,20 55L20,33A13,13 0,0 1,33 20z"
-      android:fillColor="#000000"/>
+      android:fillColor="#D9144E8A"/>
+  <path
+      android:pathData="M33,36l0,6l6,0"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2.2"
+      android:fillColor="#00000000"
+      android:strokeColor="#ffffff"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M35.51,47a9,9 0,1 0,0.49 -4.5"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2.2"
+      android:fillColor="#00000000"
+      android:strokeColor="#ffffff"
+      android:strokeLineCap="round"/>
+  <path
+      android:pathData="M44,39l0,5l3,2"
+      android:strokeLineJoin="round"
+      android:strokeWidth="2.2"
+      android:fillColor="#00000000"
+      android:strokeColor="#ffffff"
+      android:strokeLineCap="round"/>
   <path
       android:pathData="M165,38m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"
       android:strokeAlpha="0.22"

@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.example.webtonative.browsingHistoryDB.roomDB.HistoryEntity
 import com.example.webtonative.browsingHistoryDB.viewModel.HistoryUiItem
 import com.example.webtonative.browsingHistoryDB.viewModel.HistoryViewModel
+import com.example.webtonative.ui.theme.themeColors.AppThemeColors
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -59,7 +60,7 @@ fun HistoryScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.background_color))
+            .background(AppThemeColors.colors.background_color)
     ) {
         val (topBar, column, text) = createRefs()
 
@@ -74,12 +75,12 @@ fun HistoryScreen(
                 .height(64.dp)
                 .padding(horizontal = 15.dp)
                 .background(
-                    color = Color(0xFFF6F7FB),
+                    color = AppThemeColors.colors.surface_color,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .border(
                     width = 1.1.dp,
-                    color = Color(0xFFE5E7EB),
+                    color = AppThemeColors.colors.border_color,
                     shape = RoundedCornerShape(16.dp)
                 ),
             verticalAlignment = Alignment.CenterVertically
@@ -89,12 +90,12 @@ fun HistoryScreen(
                     .padding(10.dp)
                     .size(46.dp)
                     .background(
-                        color = Color(0xFFF4F4F8),
+                        color = AppThemeColors.colors.secondary_surface_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 1.1.dp,
-                        color = Color(0xFFE5E7EB),
+                        color = AppThemeColors.colors.border_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .clickable(
@@ -112,17 +113,17 @@ fun HistoryScreen(
                 Icon(
                     painter = painterResource(R.drawable.arrow_icon),
                     contentDescription = null,
-                    tint = Color(0xFF555555),
+                    tint = AppThemeColors.colors.icon_tint_color,
                     modifier = Modifier.size(22.dp)
                 )
             }
 
             Text(
                 text = "History",
-                fontSize = 18.sp, fontFamily = fonts,
+                fontSize = 19.sp, fontFamily = fonts,
                 fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.primary_text_color),
-                textAlign = TextAlign.Center, lineHeight = 20.sp,
+                color = AppThemeColors.colors.primary_text_color,
+                textAlign = TextAlign.Center, lineHeight = 24.sp,
                 letterSpacing = 0.3.sp
             )
 
@@ -133,12 +134,12 @@ fun HistoryScreen(
                     .padding(10.dp)
                     .size(46.dp)
                     .background(
-                        color = Color(0xFFF4F4F8),
+                        color = AppThemeColors.colors.secondary_surface_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 1.1.dp,
-                        color = Color(0xFFE5E7EB),
+                        color = AppThemeColors.colors.border_color,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .clickable(
@@ -156,7 +157,7 @@ fun HistoryScreen(
                 Icon(
                     painter = painterResource(R.drawable.delete_icon),
                     contentDescription = null,
-                    tint = Color(0xFF555555),
+                    tint = AppThemeColors.colors.icon_tint_color,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -178,10 +179,10 @@ fun HistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No browsing history",
+                    text = "No browsing history found",
                     fontSize = 14.sp, fontFamily = fonts,
                     fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                    color = Color(0xFF6B7280), lineHeight = 18.sp
+                    color = AppThemeColors.colors.secondary_text_color2, lineHeight = 18.sp
                 )
             }
         } else {
@@ -205,7 +206,7 @@ fun HistoryScreen(
                                 text = item.title,
                                 fontSize = 14.sp, fontFamily = fonts,
                                 fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-                                color = Color(0xFF6B7280), lineHeight = 18.sp,
+                                color = AppThemeColors.colors.secondary_text_color2, lineHeight = 18.sp,
                                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                             )
                         }
@@ -228,12 +229,12 @@ fun HistoryRow(data: HistoryEntity) {
             .padding(bottom = 8.dp)
             .height(68.dp)
             .background(
-                color = Color(0xFFF6F7FB),
+                color = AppThemeColors.colors.surface_color,
                 shape = RoundedCornerShape(16.dp)
             )
             .border(
                 width = 1.1.dp,
-                color = Color(0xFFE5E7EB),
+                color = AppThemeColors.colors.border_color,
                 shape = RoundedCornerShape(16.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -268,19 +269,37 @@ fun HistoryRow(data: HistoryEntity) {
                 text = data.title,
                 fontSize = 14.5.sp, fontFamily = fonts,
                 fontWeight = FontWeight.Bold, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.primary_text_color),
+                color = AppThemeColors.colors.primary_text_color,
                 lineHeight = 16.sp, maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = data.url,
-                fontSize = 12.5.sp, fontFamily = fonts,
-                fontWeight = FontWeight.Medium, fontStyle = FontStyle.Normal,
-                color = colorResource(R.color.secondary_text_color),
-                lineHeight = 16.sp, maxLines = 1
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.internet_icon),
+                    contentDescription = null,
+                    tint = AppThemeColors.colors.secondary_text_color2,
+                    modifier = Modifier.size(16.dp)
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Text(
+                    text = data.url
+                        .removePrefix("https://")
+                        .removePrefix("http://"),
+                    fontSize = 12.5.sp,
+                    fontFamily = fonts,
+                    fontWeight = FontWeight.Medium,
+                    fontStyle = FontStyle.Normal,
+                    color = AppThemeColors.colors.secondary_text_color,
+                    lineHeight = 16.sp,
+                    maxLines = 1
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -289,7 +308,7 @@ fun HistoryRow(data: HistoryEntity) {
             text = formatHistoryTime(data.lastVisitedTime),
             fontSize = 10.5.sp, fontFamily = fonts,
             fontWeight = FontWeight.SemiBold, fontStyle = FontStyle.Normal,
-            color = Color(0xFF6B7280), lineHeight = 14.sp
+            color = AppThemeColors.colors.secondary_text_color2, lineHeight = 14.sp
         )
 
         Spacer(modifier = Modifier.width(10.dp))
